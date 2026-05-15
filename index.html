@@ -420,6 +420,72 @@ mark { background: rgba(240,165,0,0.25); color: var(--text); border-radius: 2px;
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+/* ══════════════════════════════
+   IMAGE SEARCH
+══════════════════════════════ */
+.img-search-bar {
+  max-width: 1400px; margin: 0 auto;
+  padding: 10px 20px;
+  background: rgba(240,165,0,0.04);
+  border-bottom: 1px solid var(--border);
+}
+.img-search-inner {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+}
+.img-drop-zone {
+  border: 2px dashed var(--border2); border-radius: 8px;
+  padding: 10px 20px; cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--s2); position: relative; min-width: 220px;
+}
+.img-drop-zone:hover { border-color: var(--gold); background: rgba(240,165,0,0.05); }
+.img-drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.img-drop-zone .dz-icon { font-size: 22px; }
+.img-drop-zone .dz-text { font-size: 13px; color: var(--text2); }
+.img-drop-zone .dz-text strong { color: var(--gold); display: block; font-size: 12px; }
+.img-preview-wrap { position: relative; }
+.img-preview-wrap img {
+  width: 52px; height: 52px; object-fit: cover;
+  border-radius: 6px; border: 2px solid var(--gold);
+  display: block;
+}
+.img-preview-wrap .remove-img {
+  position: absolute; top: -6px; right: -6px;
+  background: var(--red); color: #fff; border: none;
+  border-radius: 50%; width: 18px; height: 18px;
+  font-size: 11px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; line-height: 1;
+}
+.img-search-btn {
+  padding: 11px 22px; background: linear-gradient(135deg, var(--gold), var(--orange));
+  border: none; border-radius: 8px; color: #000; font-family: var(--head);
+  font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: .5px;
+  transition: all .2s; white-space: nowrap;
+}
+.img-search-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(240,165,0,0.3); }
+.img-search-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.img-status { font-family: var(--mono); font-size: 12px; color: var(--text3); }
+.img-status.active { color: var(--gold); }
+.img-results-banner {
+  background: rgba(240,165,0,0.08); border: 1px solid rgba(240,165,0,0.25);
+  border-radius: 6px; padding: 8px 16px; margin-top: 8px;
+  font-size: 13px; color: var(--gold); display: none;
+  align-items: center; justify-content: space-between; gap: 10px;
+}
+.img-results-banner.show { display: flex; }
+.clear-img-search {
+  background: none; border: 1px solid rgba(240,165,0,0.3); color: var(--gold);
+  border-radius: 4px; padding: 3px 10px; cursor: pointer; font-size: 12px;
+  transition: all .2s;
+}
+.clear-img-search:hover { background: rgba(240,165,0,0.1); }
+.match-score {
+  position: absolute; top: 8px; right: 8px;
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  color: #000; font-family: var(--mono); font-size: 10px; font-weight: 700;
+  padding: 2px 7px; border-radius: 4px;
+}
 </style>
 </head>
 <body>
@@ -451,6 +517,9 @@ mark { background: rgba(240,165,0,0.25); color: var(--text); border-radius: 2px;
     <button class="sync-btn" id="syncBtn" onclick="fetchParts()">
       <span class="sync-icon">↻</span> Sync
     </button>
+    <button class="sync-btn" id="photoBtn" onclick="updatePhotos()" style="color:var(--gold);border-left:1px solid var(--border)">
+      <span id="photoIcon">📷</span> Update Photos
+    </button>
   </div>
 </header>
 
@@ -471,6 +540,31 @@ mark { background: rgba(240,165,0,0.25); color: var(--text); border-radius: 2px;
       <button class="view-opt" id="listBtn" title="Table">☰</button>
     </div>
     <button class="clear-btn" onclick="clearFilters()">✕ Clear</button>
+  </div>
+</div>
+
+
+<!-- IMAGE SEARCH BAR -->
+<div class="img-search-bar">
+  <div class="img-search-inner">
+    <div style="font-family:var(--head);font-size:13px;font-weight:700;color:var(--gold);letter-spacing:1px;white-space:nowrap;">🔍 PHOTO SEARCH</div>
+    <div class="img-drop-zone" id="imgDropZone">
+      <input type="file" id="imgFileInput" accept="image/*" onchange="handleImgUpload(event)">
+      <span class="dz-icon">📷</span>
+      <div class="dz-text">Part ni photo upload karo<strong>Click or drag here</strong></div>
+    </div>
+    <div class="img-preview-wrap" id="imgPreviewWrap" style="display:none">
+      <img id="imgPreview" src="" alt="Preview">
+      <button class="remove-img" onclick="clearImgSearch()">✕</button>
+    </div>
+    <button class="img-search-btn" id="imgSearchBtn" onclick="runImageSearch()" disabled>
+      🤖 AI Search
+    </button>
+    <div class="img-status" id="imgStatus">Photo upload karo — AI similar parts dhundhse</div>
+  </div>
+  <div class="img-results-banner" id="imgResultsBanner">
+    <span id="imgResultsText"></span>
+    <button class="clear-img-search" onclick="clearImgSearch()">✕ Clear Photo Search</button>
   </div>
 </div>
 
@@ -508,7 +602,7 @@ mark { background: rgba(240,165,0,0.25); color: var(--text); border-radius: 2px;
 // ═══════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwskuGWRHMcsdyurP69XGF8p-kgLXAu4wJ30XAmceOvqxSl4JXw8_HMdS2GOFvvXQ/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQVhnAlNMM_jnWOcvpXXD6-1EZSZbRejrmrQEWZocsX2EsNn36FhdDRZxd4n5w5Fg/exec';
 const PAGE_SIZE = 30;
 
 // ═══════════════════════════════════════
@@ -853,6 +947,221 @@ document.getElementById('detailOverlay').addEventListener('click', (e) => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeDetail();
 });
+
+// ═══════════════════════════════════════
+// UPDATE PHOTOS
+// ═══════════════════════════════════════
+async function updatePhotos() {
+  const btn = document.getElementById('photoBtn');
+  const ico = document.getElementById('photoIcon');
+  btn.style.opacity = '0.6';
+  btn.style.pointerEvents = 'none';
+  ico.textContent = '⏳';
+  showToast('Drive folder scan kare che...', '');
+
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=updatePhotos', { redirect: 'follow' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if (json.status === 'ok') {
+      showToast('✓ ' + json.message, 'ok');
+      // Reload data to show new photos
+      setTimeout(() => fetchParts(), 1000);
+    } else {
+      throw new Error(json.message || 'Unknown error');
+    }
+  } catch (err) {
+    showToast('Photo update failed: ' + err.message, 'err');
+  } finally {
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+    ico.textContent = '📷';
+  }
+}
+
+
+// ═══════════════════════════════════════
+// IMAGE SEARCH — Gemini Vision AI
+// ═══════════════════════════════════════
+const GEMINI_KEY = 'AIzaSyA0FOmnRkUp4e9IplyIELnRLGJgqvHlSs4';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_KEY;
+
+let uploadedImgBase64 = null;
+let uploadedImgMime = null;
+let imgSearchMode = false;
+let imgSearchScores = {};
+
+function handleImgUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { showToast('Photo 10MB thi moti — choti photo use karo', 'err'); return; }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    uploadedImgBase64 = dataUrl.split(',')[1];
+    uploadedImgMime = file.type || 'image/jpeg';
+
+    document.getElementById('imgPreview').src = dataUrl;
+    document.getElementById('imgPreviewWrap').style.display = 'block';
+    document.getElementById('imgDropZone').style.display = 'none';
+    document.getElementById('imgSearchBtn').disabled = false;
+    document.getElementById('imgStatus').textContent = 'AI Search ready — button dabao!';
+    document.getElementById('imgStatus').className = 'img-status active';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function runImageSearch() {
+  if (!uploadedImgBase64) return;
+
+  const btn = document.getElementById('imgSearchBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ AI analyzing...';
+  document.getElementById('imgStatus').textContent = 'Gemini AI photo scan kare che...';
+
+  try {
+    // Step 1: Gemini thi photo describe karavо
+    const prompt = `You are analyzing an engineering spare part image for a manufacturing store.
+Describe this part in detail focusing on:
+1. Part type (bearing, seal, belt, valve, sensor, gear, coupling, filter, etc.)
+2. Physical characteristics (shape, size hints, color, material)
+3. Any visible text, numbers, or markings
+4. Likely application or equipment type
+5. Key technical features
+
+Return a comma-separated list of technical keywords that would help match this to a database of spare parts.
+Keep response under 100 words, focus on searchable technical terms.`;
+
+    const geminiRes = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inline_data: { mime_type: uploadedImgMime, data: uploadedImgBase64 } }
+          ]
+        }],
+        generationConfig: { maxOutputTokens: 200, temperature: 0.2 }
+      })
+    });
+
+    if (!geminiRes.ok) throw new Error('Gemini API error: ' + geminiRes.status);
+    const geminiData = await geminiRes.json();
+    const aiDesc = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    if (!aiDesc) throw new Error('Gemini response empty');
+
+    document.getElementById('imgStatus').textContent = 'AI: "' + aiDesc.substring(0, 60) + '..."';
+
+    // Step 2: AI description thi parts match karo
+    const keywords = aiDesc.toLowerCase()
+      .replace(/[^\w\s,]/g, ' ')
+      .split(/[\s,]+/)
+      .filter(w => w.length > 2);
+
+    // Score each part
+    imgSearchScores = {};
+    allParts.forEach(p => {
+      const searchText = [p.desc, p.category, p.equipment, p.make, p.partno]
+        .join(' ').toLowerCase();
+      let score = 0;
+      keywords.forEach(kw => {
+        if (searchText.includes(kw)) score += kw.length > 4 ? 3 : 1;
+      });
+      if (score > 0) imgSearchScores[p.ecode] = score;
+    });
+
+    const matchCount = Object.keys(imgSearchScores).length;
+    if (matchCount === 0) {
+      showToast('Koi similar part na mallo — different angle thi try karo', 'err');
+      btn.disabled = false;
+      btn.textContent = '🤖 AI Search';
+      return;
+    }
+
+    // Step 3: Sort by score and show
+    imgSearchMode = true;
+    filtered = allParts
+      .filter(p => imgSearchScores[p.ecode])
+      .sort((a, b) => (imgSearchScores[b.ecode] || 0) - (imgSearchScores[a.ecode] || 0))
+      .slice(0, 20);
+
+    currentPage = 1;
+    document.getElementById('statShowing').textContent = filtered.length;
+
+    const banner = document.getElementById('imgResultsBanner');
+    banner.classList.add('show');
+    document.getElementById('imgResultsText').textContent =
+      `📷 AI found ${filtered.length} similar parts — "${aiDesc.substring(0, 50)}..."`;
+
+    renderImgResults();
+    showToast(`✓ ${filtered.length} similar parts malla!`, 'ok');
+
+  } catch(err) {
+    console.error(err);
+    showToast('AI Search failed: ' + err.message, 'err');
+    document.getElementById('imgStatus').textContent = 'Error: ' + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🤖 AI Search';
+  }
+}
+
+function renderImgResults() {
+  const cont = document.getElementById('partsContainer');
+  if (!filtered.length) {
+    cont.innerHTML = '<div class="empty"><div class="empty-icon">🔩</div><h3>No similar parts found</h3></div>';
+    return;
+  }
+
+  // Grid with match score badges
+  const html = filtered.map(p => {
+    const score = imgSearchScores[p.ecode] || 0;
+    const maxScore = Math.max(...Object.values(imgSearchScores));
+    const pct = Math.round((score / maxScore) * 100);
+    const photo = driveThumb(p.photo);
+    return `<div class="part-card" onclick="openDetail('${p.ecode}')">
+      <div class="card-photo">
+        ${photo ? `<img src="${photo}" alt="" onerror="this.style.display='none'">` : ''}
+        <div class="no-img" style="${photo?'display:none':''}">⚙</div>
+        <span class="match-score">${pct}% match</span>
+        ${p.location ? `<span class="loc-chip">${p.location}</span>` : ''}
+      </div>
+      <div class="card-body">
+        <div class="card-ecode">${p.ecode}</div>
+        <div class="card-desc">${p.desc}</div>
+        <div class="card-meta">
+          ${p.partno ? `<span class="meta-tag">${p.partno}</span>` : ''}
+          ${p.equipment ? `<span class="meta-tag eq">${p.equipment}</span>` : ''}
+          ${p.make ? `<span class="meta-tag">${p.make}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  cont.innerHTML = `<div class="parts-grid">${html}</div>`;
+  document.getElementById('pager').innerHTML = '';
+}
+
+function clearImgSearch() {
+  uploadedImgBase64 = null;
+  uploadedImgMime = null;
+  imgSearchMode = false;
+  imgSearchScores = {};
+
+  document.getElementById('imgFileInput').value = '';
+  document.getElementById('imgPreviewWrap').style.display = 'none';
+  document.getElementById('imgDropZone').style.display = 'flex';
+  document.getElementById('imgSearchBtn').disabled = true;
+  document.getElementById('imgSearchBtn').textContent = '🤖 AI Search';
+  document.getElementById('imgStatus').textContent = 'Photo upload karo — AI similar parts dhundhse';
+  document.getElementById('imgStatus').className = 'img-status';
+  document.getElementById('imgResultsBanner').classList.remove('show');
+
+  applyFilters();
+}
 
 // ═══════════════════════════════════════
 // INIT
