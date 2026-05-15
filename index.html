@@ -451,9 +451,6 @@ mark { background: rgba(240,165,0,0.25); color: var(--text); border-radius: 2px;
     <button class="sync-btn" id="syncBtn" onclick="fetchParts()">
       <span class="sync-icon">↻</span> Sync
     </button>
-    <button class="sync-btn" id="photoBtn" onclick="updatePhotos()" style="color:var(--gold);border-left:1px solid var(--border)">
-      <span id="photoIcon">📷</span> Update Photos
-    </button>
   </div>
 </header>
 
@@ -511,7 +508,7 @@ mark { background: rgba(240,165,0,0.25); color: var(--text); border-radius: 2px;
 // ═══════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQVhnAlNMM_jnWOcvpXXD6-1EZSZbRejrmrQEWZocsX2EsNn36FhdDRZxd4n5w5Fg/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwskuGWRHMcsdyurP69XGF8p-kgLXAu4wJ30XAmceOvqxSl4JXw8_HMdS2GOFvvXQ/exec';
 const PAGE_SIZE = 30;
 
 // ═══════════════════════════════════════
@@ -856,37 +853,6 @@ document.getElementById('detailOverlay').addEventListener('click', (e) => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeDetail();
 });
-
-// ═══════════════════════════════════════
-// UPDATE PHOTOS
-// ═══════════════════════════════════════
-async function updatePhotos() {
-  const btn = document.getElementById('photoBtn');
-  const ico = document.getElementById('photoIcon');
-  btn.style.opacity = '0.6';
-  btn.style.pointerEvents = 'none';
-  ico.textContent = '⏳';
-  showToast('Drive folder scan kare che...', '');
-
-  try {
-    const res = await fetch(SCRIPT_URL + '?action=updatePhotos', { redirect: 'follow' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    if (json.status === 'ok') {
-      showToast('✓ ' + json.message, 'ok');
-      // Reload data to show new photos
-      setTimeout(() => fetchParts(), 1000);
-    } else {
-      throw new Error(json.message || 'Unknown error');
-    }
-  } catch (err) {
-    showToast('Photo update failed: ' + err.message, 'err');
-  } finally {
-    btn.style.opacity = '1';
-    btn.style.pointerEvents = 'auto';
-    ico.textContent = '📷';
-  }
-}
 
 // ═══════════════════════════════════════
 // INIT
