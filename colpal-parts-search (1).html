@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Colpal Sanand — Parts Search</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Share+Tech+Mono&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0c10;
+  --s1: #111318;
+  --s2: #181c24;
+  --s3: #1f2433;
+  --border: #252d40;
+  --border2: #2e3a52;
+  --gold: #f0a500;
+  --gold2: #ffd166;
+  --orange: #e06030;
+  --blue: #3a8fd4;
+  --green: #27ae60;
+  --red: #c0392b;
+  --text: #cdd5e0;
+  --text2: #8a95a8;
+  --text3: #4a5568;
+  --mono: 'Share Tech Mono', monospace;
+  --sans: 'Barlow', sans-serif;
+  --head: 'Barlow Condensed', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% -10%, rgba(240,165,0,0.06) 0%, transparent 70%),
+    repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.01) 40px, rgba(255,255,255,0.01) 41px),
+    repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.01) 40px, rgba(255,255,255,0.01) 41px);
+}
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(180deg, #0d1220 0%, #0a0c10 100%);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 2px 40px rgba(0,0,0,0.6);
+}
+.header-inner {
+  max-width: 1400px; margin: 0 auto;
+  padding: 0 20px;
+  display: flex; align-items: stretch; gap: 0;
+  min-height: 64px;
+}
+.brand {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 24px 12px 0;
+  border-right: 1px solid var(--border);
+  margin-right: 24px;
+}
+.brand-icon {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.brand-text h1 {
+  font-family: var(--head); font-size: 18px; font-weight: 800;
+  color: var(--gold); letter-spacing: 2px; line-height: 1;
+  text-transform: uppercase;
+}
+.brand-text p {
+  font-size: 10px; color: var(--text3); letter-spacing: 2px;
+  text-transform: uppercase; margin-top: 2px;
+}
+.header-stats {
+  display: flex; align-items: center; gap: 0; margin-left: auto;
+}
+.stat-item {
+  padding: 0 20px; text-align: center;
+  border-left: 1px solid var(--border);
+}
+.stat-val {
+  font-family: var(--mono); font-size: 20px; color: var(--gold);
+  line-height: 1; display: block;
+}
+.stat-lbl {
+  font-size: 9px; color: var(--text3); letter-spacing: 2px;
+  text-transform: uppercase; margin-top: 2px; display: block;
+}
+.sync-btn {
+  padding: 0 20px; border-left: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  background: none; border-top: none; border-right: none; border-bottom: none;
+  color: var(--text2); cursor: pointer; font-family: var(--head);
+  font-size: 13px; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; transition: color .2s;
+}
+.sync-btn:hover { color: var(--gold); }
+.sync-icon { font-size: 16px; transition: transform .6s; }
+.sync-btn.spinning .sync-icon { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── SEARCH BAR ── */
+.search-section {
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+}
+.search-inner {
+  max-width: 1400px; margin: 0 auto;
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+}
+.search-wrap {
+  flex: 1; min-width: 260px; position: relative;
+}
+.search-input {
+  width: 100%;
+  background: var(--s2); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--mono); font-size: 14px;
+  padding: 11px 44px 11px 16px; border-radius: 6px;
+  outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.search-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(240,165,0,0.1);
+}
+.search-input::placeholder { color: var(--text3); }
+.search-ico {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--text3); font-size: 16px; pointer-events: none;
+}
+.filter-pill {
+  background: var(--s2); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--sans); font-size: 13px;
+  padding: 10px 14px; border-radius: 6px; outline: none; cursor: pointer;
+  min-width: 150px; transition: border-color .2s;
+}
+.filter-pill:focus { border-color: var(--gold); }
+.view-group { display: flex; border: 1px solid var(--border2); border-radius: 6px; overflow: hidden; }
+.view-opt {
+  padding: 10px 14px; background: var(--s2); border: none;
+  color: var(--text3); cursor: pointer; font-size: 16px;
+  transition: all .2s; border-right: 1px solid var(--border2);
+}
+.view-opt:last-child { border-right: none; }
+.view-opt.on { background: var(--gold); color: #000; }
+.clear-btn {
+  padding: 10px 16px; background: none;
+  border: 1px solid var(--border2); color: var(--text3);
+  border-radius: 6px; cursor: pointer; font-family: var(--sans);
+  font-size: 13px; transition: all .2s; white-space: nowrap;
+}
+.clear-btn:hover { border-color: var(--red); color: var(--red); }
+
+/* ── RESULTS BAR ── */
+.results-bar {
+  max-width: 1400px; margin: 0 auto;
+  padding: 10px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--mono); font-size: 12px; color: var(--text3);
+}
+.results-bar .found { color: var(--gold); font-size: 14px; font-weight: 700; }
+
+/* ── MAIN CONTENT ── */
+.main { max-width: 1400px; margin: 0 auto; padding: 0 20px 40px; }
+
+/* ── LOADING ── */
+.loader {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 80px 20px; gap: 20px;
+}
+.loader-ring {
+  width: 48px; height: 48px;
+  border: 3px solid var(--border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.loader p { color: var(--text2); font-family: var(--mono); font-size: 13px; }
+
+/* ── EMPTY ── */
+.empty {
+  text-align: center; padding: 80px 20px;
+}
+.empty-icon { font-size: 64px; margin-bottom: 16px; opacity: .4; }
+.empty h3 { font-family: var(--head); font-size: 22px; color: var(--text2); margin-bottom: 8px; }
+.empty p { font-size: 14px; color: var(--text3); }
+
+/* ── ERROR ── */
+.error-box {
+  background: rgba(192,57,43,0.1); border: 1px solid rgba(192,57,43,0.4);
+  border-radius: 8px; padding: 20px 24px; margin: 20px 0;
+  font-size: 14px; color: #e74c3c;
+}
+
+/* ══════════════════════════════
+   GRID VIEW
+══════════════════════════════ */
+.parts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  padding-top: 4px;
+}
+.part-card {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden;
+  cursor: pointer;
+  transition: border-color .2s, transform .2s, box-shadow .2s;
+  display: flex; flex-direction: column;
+}
+.part-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(240,165,0,0.2);
+}
+.card-photo {
+  height: 150px; background: var(--s3);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; position: relative; flex-shrink: 0;
+}
+.card-photo img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .3s;
+}
+.part-card:hover .card-photo img { transform: scale(1.04); }
+.card-photo .no-img { font-size: 44px; opacity: .2; }
+.stock-badge {
+  position: absolute; top: 8px; left: 8px;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+  border-radius: 4px; padding: 2px 8px;
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+}
+.stock-badge.ok { color: var(--green); border: 1px solid rgba(39,174,96,0.4); }
+.stock-badge.zero { color: var(--red); border: 1px solid rgba(192,57,43,0.4); }
+.loc-chip {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(240,165,0,0.15); backdrop-filter: blur(4px);
+  border: 1px solid rgba(240,165,0,0.3);
+  color: var(--gold); font-family: var(--mono); font-size: 10px;
+  padding: 2px 8px; border-radius: 4px;
+  max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.card-body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.card-ecode { font-family: var(--mono); font-size: 11px; color: var(--orange); letter-spacing: 1px; }
+.card-desc {
+  font-family: var(--head); font-size: 15px; font-weight: 600;
+  color: var(--text); line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.card-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.meta-tag {
+  font-size: 11px; padding: 2px 7px; border-radius: 3px;
+  background: var(--s3); color: var(--text2); border: 1px solid var(--border);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;
+}
+.meta-tag.eq { color: var(--blue); border-color: rgba(58,143,212,0.3); background: rgba(58,143,212,0.08); }
+
+/* ══════════════════════════════
+   TABLE VIEW
+══════════════════════════════ */
+.table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+.parts-table { width: 100%; border-collapse: collapse; }
+.parts-table th {
+  background: var(--s2); color: var(--gold);
+  font-family: var(--head); font-size: 11px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 12px 14px; text-align: left;
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+  cursor: pointer; user-select: none;
+  transition: color .15s;
+}
+.parts-table th:hover { color: var(--gold2); }
+.parts-table th .sort-ico { opacity: .4; margin-left: 4px; }
+.parts-table th.active .sort-ico { opacity: 1; color: var(--gold2); }
+.parts-table td {
+  padding: 10px 14px; border-bottom: 1px solid rgba(37,45,64,0.6);
+  font-size: 13px; vertical-align: middle;
+}
+.parts-table tr:last-child td { border-bottom: none; }
+.parts-table tr:hover td { background: rgba(240,165,0,0.03); cursor: pointer; }
+.td-thumb { width: 52px; }
+.td-thumb img {
+  width: 44px; height: 44px; object-fit: cover;
+  border-radius: 5px; border: 1px solid var(--border);
+  display: block;
+}
+.td-thumb .no-th {
+  width: 44px; height: 44px; background: var(--s3);
+  border-radius: 5px; border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; opacity: .3;
+}
+.tag-ecode {
+  font-family: var(--mono); font-size: 12px; color: var(--orange);
+  background: rgba(224,96,48,0.1); padding: 2px 8px; border-radius: 3px;
+  border: 1px solid rgba(224,96,48,0.25); white-space: nowrap;
+}
+.tag-loc {
+  font-family: var(--mono); font-size: 12px; color: var(--gold);
+  background: rgba(240,165,0,0.08); padding: 2px 8px; border-radius: 3px;
+  border: 1px solid rgba(240,165,0,0.2); white-space: nowrap;
+}
+.tag-stock-ok {
+  font-family: var(--mono); font-size: 12px; color: var(--green);
+  background: rgba(39,174,96,0.1); padding: 2px 8px; border-radius: 3px;
+  border: 1px solid rgba(39,174,96,0.25);
+}
+.tag-stock-zero {
+  font-family: var(--mono); font-size: 12px; color: var(--red);
+  background: rgba(192,57,43,0.1); padding: 2px 8px; border-radius: 3px;
+  border: 1px solid rgba(192,57,43,0.25);
+}
+
+/* ══════════════════════════════
+   DETAIL MODAL
+══════════════════════════════ */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  z-index: 200; display: flex; align-items: center; justify-content: center;
+  padding: 20px; animation: fadeIn .15s ease;
+}
+.overlay.hidden { display: none; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: var(--s2); border: 1px solid var(--border2);
+  border-radius: 10px; width: 100%; max-width: 560px;
+  max-height: 90vh; overflow-y: auto;
+  animation: slideUp .2s ease;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.7);
+}
+@keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-hd {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; background: var(--s2); z-index: 1;
+}
+.modal-hd h2 { font-family: var(--head); font-size: 17px; font-weight: 700; color: var(--gold); }
+.modal-x {
+  background: none; border: none; color: var(--text3); font-size: 20px;
+  cursor: pointer; transition: color .2s; line-height: 1; padding: 2px;
+}
+.modal-x:hover { color: var(--red); }
+.modal-bd { padding: 20px; }
+.det-photo {
+  width: 100%; height: 220px; background: var(--s3);
+  border-radius: 8px; overflow: hidden; margin-bottom: 18px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border);
+}
+.det-photo img { width: 100%; height: 100%; object-fit: contain; }
+.det-photo .big-ico { font-size: 64px; opacity: .15; }
+.det-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.det-field .lbl {
+  font-size: 10px; color: var(--text3); letter-spacing: 1.5px;
+  text-transform: uppercase; margin-bottom: 4px;
+}
+.det-field .val { font-size: 15px; color: var(--text); line-height: 1.3; }
+.det-field .val.mono { font-family: var(--mono); color: var(--gold); }
+.det-field .val.loc { color: var(--gold); }
+.det-field .val.desc { font-family: var(--head); font-size: 18px; font-weight: 700; }
+.det-full { grid-column: 1 / -1; }
+.stock-row {
+  margin-top: 16px; padding: 12px 16px;
+  background: var(--s3); border-radius: 6px;
+  display: flex; align-items: center; justify-content: space-between;
+  border: 1px solid var(--border);
+}
+.stock-row .lbl { font-size: 11px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.stock-row .qty { font-family: var(--mono); font-size: 22px; font-weight: 700; }
+.stock-row .qty.ok { color: var(--green); }
+.stock-row .qty.zero { color: var(--red); }
+
+/* ══════════════════════════════
+   PAGINATION
+══════════════════════════════ */
+.pager { display: flex; gap: 6px; justify-content: center; padding: 24px 0 4px; flex-wrap: wrap; }
+.pg-btn {
+  padding: 7px 13px; border-radius: 5px;
+  border: 1px solid var(--border); background: var(--s2);
+  color: var(--text2); cursor: pointer; font-family: var(--mono);
+  font-size: 13px; transition: all .15s;
+}
+.pg-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+.pg-btn.on { background: var(--gold); color: #000; border-color: var(--gold); font-weight: 700; }
+.pg-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+/* ══════════════════════════════
+   HIGHLIGHT / TOAST
+══════════════════════════════ */
+mark { background: rgba(240,165,0,0.25); color: var(--text); border-radius: 2px; padding: 0 1px; }
+.toast {
+  position: fixed; bottom: 20px; right: 20px;
+  background: var(--s2); border: 1px solid var(--border2);
+  border-radius: 7px; padding: 12px 18px; font-size: 13px;
+  color: var(--text); z-index: 999;
+  transform: translateY(60px); opacity: 0; transition: all .3s ease;
+  max-width: 300px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.ok { border-color: var(--green); color: var(--green); }
+.toast.err { border-color: var(--red); color: var(--red); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .header-inner { flex-wrap: wrap; padding: 10px 14px; }
+  .brand { border-right: none; margin-right: 0; padding-right: 0; }
+  .header-stats { flex-wrap: wrap; gap: 0; }
+  .stat-item { padding: 6px 12px; }
+  .search-inner { flex-direction: column; }
+  .filter-pill { min-width: unset; width: 100%; }
+  .det-grid { grid-template-columns: 1fr; }
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-icon">⚙</div>
+      <div class="brand-text">
+        <h1>Parts Search</h1>
+        <p>Colgate-Palmolive · Sanand Store</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="stat-item">
+        <span class="stat-val" id="statTotal">—</span>
+        <span class="stat-lbl">Total Parts</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val" id="statShowing">—</span>
+        <span class="stat-lbl">Showing</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val" id="statCats">—</span>
+        <span class="stat-lbl">Categories</span>
+      </div>
+    </div>
+    <button class="sync-btn" id="syncBtn" onclick="fetchParts()">
+      <span class="sync-icon">↻</span> Sync
+    </button>
+    <button class="sync-btn" id="photoBtn" onclick="updatePhotos()" style="color:var(--gold);border-left:1px solid var(--border)">
+      <span id="photoIcon">📷</span> Update Photos
+    </button>
+  </div>
+</header>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-inner">
+    <div class="search-wrap">
+      <input class="search-input" id="searchInput"
+        type="text" placeholder="Search E-Code, Description, Part No, Equipment, Make..."
+        autocomplete="off">
+      <span class="search-ico">⌕</span>
+    </div>
+    <select class="filter-pill" id="catFilter"><option value="">All Categories</option></select>
+    <select class="filter-pill" id="eqFilter"><option value="">All Equipment</option></select>
+    <select class="filter-pill" id="locFilter"><option value="">All Locations</option></select>
+    <div class="view-group">
+      <button class="view-opt on" id="gridBtn" title="Grid">⊞</button>
+      <button class="view-opt" id="listBtn" title="Table">☰</button>
+    </div>
+    <button class="clear-btn" onclick="clearFilters()">✕ Clear</button>
+  </div>
+</div>
+
+<!-- RESULTS BAR -->
+<div class="results-bar">
+  <span id="resultsText">Loading data from Google Sheets...</span>
+  <span id="pageText" style="color:var(--text3)"></span>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div id="partsContainer">
+    <div class="loader">
+      <div class="loader-ring"></div>
+      <p>Fetching parts from Google Sheets...</p>
+    </div>
+  </div>
+  <div class="pager" id="pager"></div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="overlay hidden" id="detailOverlay">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2>📋 Part Details</h2>
+      <button class="modal-x" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="modal-bd" id="detailBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQVhnAlNMM_jnWOcvpXXD6-1EZSZbRejrmrQEWZocsX2EsNn36FhdDRZxd4n5w5Fg/exec';
+const PAGE_SIZE = 30;
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let allParts = [];
+let filtered = [];
+let currentPage = 1;
+let viewMode = 'grid';
+let sortKey = 'ecode';
+let sortAsc = true;
+let lastSync = null;
+
+// ═══════════════════════════════════════
+// FETCH — standard fetch (CORS allowed via Apps Script)
+// ═══════════════════════════════════════
+async function fetchParts() {
+  const btn = document.getElementById('syncBtn');
+  btn.classList.add('spinning');
+  document.getElementById('partsContainer').innerHTML =
+    `<div class="loader"><div class="loader-ring"></div><p>Fetching from Google Sheets...</p></div>`;
+  document.getElementById('pager').innerHTML = '';
+
+  try {
+    const res = await fetch(SCRIPT_URL, { redirect: 'follow' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    if (!json || json.status !== 'ok') throw new Error('Script returned error');
+    allParts = json.parts || [];
+    lastSync = new Date();
+    updateFilters();
+    applyFilters();
+    showToast(`✓ ${allParts.length} parts loaded`, 'ok');
+  } catch (err) {
+    document.getElementById('partsContainer').innerHTML =
+      `<div class="error-box">
+        ⚠️ Could not fetch data from Google Sheets.<br><br>
+        <strong>Apps Script ma aa code paste karo (CORS fix):</strong><br>
+        <code style="display:block;background:#0a0c10;padding:10px;border-radius:5px;margin:8px 0;font-size:11px;color:#f0a500">
+        function doGet(e) {<br>
+        &nbsp;&nbsp;// ... same code ...<br>
+        &nbsp;&nbsp;var output = ContentService.createTextOutput(json)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;.setMimeType(ContentService.MimeType.JSON);<br>
+        &nbsp;&nbsp;return output;<br>
+        }
+        </code>
+        <small style="color:var(--text3)">${err.message}</small><br><br>
+        <button onclick="fetchParts()" style="margin-top:8px;padding:8px 18px;background:var(--gold);color:#000;border:none;border-radius:5px;cursor:pointer;font-family:var(--head);font-size:14px;font-weight:700;">↻ Retry</button>
+      </div>`;
+    showToast('Fetch failed: ' + err.message, 'err');
+  } finally {
+    btn.classList.remove('spinning');
+  }
+}
+
+// ═══════════════════════════════════════
+// FILTERS
+// ═══════════════════════════════════════
+function updateFilters() {
+  const cats = [...new Set(allParts.map(p => p.category).filter(Boolean))].sort();
+  const eqs  = [...new Set(allParts.map(p => p.equipment).filter(Boolean))].sort();
+  const locs = [...new Set(allParts.map(p => p.location).filter(Boolean))].sort();
+
+  fillSelect('catFilter', cats, 'All Categories');
+  fillSelect('eqFilter',  eqs,  'All Equipment');
+  fillSelect('locFilter', locs, 'All Locations');
+
+  document.getElementById('statTotal').textContent = allParts.length;
+  document.getElementById('statCats').textContent = cats.length;
+}
+
+function fillSelect(id, opts, placeholder) {
+  const sel = document.getElementById(id);
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">${placeholder}</option>` +
+    opts.map(o => `<option value="${o}" ${o===cur?'selected':''}>${o}</option>`).join('');
+}
+
+function applyFilters() {
+  const q   = document.getElementById('searchInput').value.trim().toLowerCase();
+  const cat = document.getElementById('catFilter').value;
+  const eq  = document.getElementById('eqFilter').value;
+  const loc = document.getElementById('locFilter').value;
+
+  filtered = allParts.filter(p => {
+    const mQ = !q || [p.ecode, p.desc, p.partno, p.equipment, p.make, p.category, p.location]
+      .some(f => (f||'').toLowerCase().includes(q));
+    const mC = !cat || p.category === cat;
+    const mE = !eq  || p.equipment === eq;
+    const mL = !loc || p.location === loc;
+    return mQ && mC && mE && mL;
+  });
+
+  // sort
+  filtered.sort((a, b) => {
+    const av = (a[sortKey]||'').toString().toLowerCase();
+    const bv = (b[sortKey]||'').toString().toLowerCase();
+    return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+  });
+
+  currentPage = 1;
+  document.getElementById('statShowing').textContent = filtered.length;
+  render();
+}
+
+function clearFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('catFilter').value = '';
+  document.getElementById('eqFilter').value = '';
+  document.getElementById('locFilter').value = '';
+  applyFilters();
+}
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+function render() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const total = filtered.length;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (currentPage > pages) currentPage = 1;
+  const slice = filtered.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+  // results text
+  document.getElementById('resultsText').innerHTML =
+    total === allParts.length
+      ? `<span class="found">${total}</span> parts`
+      : `<span class="found">${total}</span> of ${allParts.length} parts${q ? ` matching "<b style="color:var(--text)">${q}</b>"` : ''}`;
+
+  document.getElementById('pageText').textContent = pages > 1 ? `Page ${currentPage} / ${pages}` : '';
+
+  const cont = document.getElementById('partsContainer');
+  if (!slice.length) {
+    cont.innerHTML = `<div class="empty"><div class="empty-icon">🔩</div><h3>No parts found</h3><p>Try a different search or clear filters.</p></div>`;
+    document.getElementById('pager').innerHTML = '';
+    return;
+  }
+
+  cont.innerHTML = viewMode === 'grid' ? renderGrid(slice, q) : renderTable(slice, q);
+  renderPager(pages);
+}
+
+// ── GRID ──
+function renderGrid(items, q) {
+  return `<div class="parts-grid">${items.map(p => {
+    const stockNum = parseInt(p.stock) || 0;
+    const stockOk = stockNum > 0;
+    const photo = driveThumb(p.photo);
+    return `<div class="part-card" onclick="openDetail('${p.ecode}')">
+      <div class="card-photo">
+        ${photo
+          ? `<img src="${photo}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+          : ''}
+        <div class="no-img" style="${photo?'display:none':''}">⚙</div>
+        ${p.stock !== '' ? `<span class="stock-badge ${stockOk?'ok':'zero'}">QTY: ${p.stock||0}</span>` : ''}
+        ${p.location ? `<span class="loc-chip">${p.location}</span>` : ''}
+      </div>
+      <div class="card-body">
+        <div class="card-ecode">${hl(p.ecode, q)}</div>
+        <div class="card-desc">${hl(p.desc, q)}</div>
+        <div class="card-meta">
+          ${p.partno ? `<span class="meta-tag">${hl(p.partno, q)}</span>` : ''}
+          ${p.equipment ? `<span class="meta-tag eq">${hl(p.equipment, q)}</span>` : ''}
+          ${p.make ? `<span class="meta-tag">${hl(p.make, q)}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── TABLE ──
+function renderTable(items, q) {
+  const th = (key, label) =>
+    `<th onclick="sortBy('${key}')" class="${sortKey===key?'active':''}">
+      ${label}<span class="sort-ico">${sortKey===key?(sortAsc?'▲':'▼'):'⇅'}</span>
+    </th>`;
+  const rows = items.map(p => {
+    const stockNum = parseInt(p.stock) || 0;
+    const photo = driveThumb(p.photo);
+    return `<tr onclick="openDetail('${p.ecode}')">
+      <td class="td-thumb">
+        ${photo
+          ? `<img src="${photo}" alt="" onerror="this.outerHTML='<div class=\\'no-th\\'>⚙</div>'">`
+          : `<div class="no-th">⚙</div>`}
+      </td>
+      <td><span class="tag-ecode">${hl(p.ecode, q)}</span></td>
+      <td style="max-width:280px;font-weight:500">${hl(p.desc, q)}</td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--text2)">${hl(p.partno, q)}</td>
+      <td style="color:var(--text2)">${hl(p.category, q)}</td>
+      <td style="color:var(--blue)">${hl(p.equipment, q)}</td>
+      <td style="color:var(--text2)">${hl(p.make, q)}</td>
+      <td><span class="tag-loc">${hl(p.location, q)}</span></td>
+      <td><span class="${stockNum>0?'tag-stock-ok':'tag-stock-zero'}">${p.stock||0}</span></td>
+    </tr>`;
+  }).join('');
+  return `<div class="table-wrap"><table class="parts-table">
+    <thead><tr>
+      <th>Photo</th>
+      ${th('ecode','E-Code')}
+      ${th('desc','Description')}
+      ${th('partno','Part No')}
+      ${th('category','Category')}
+      ${th('equipment','Equipment')}
+      ${th('make','Make')}
+      ${th('location','Location')}
+      ${th('stock','Stock')}
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+
+// ── PAGER ──
+function renderPager(pages) {
+  if (pages <= 1) { document.getElementById('pager').innerHTML = ''; return; }
+  let html = `<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>◀</button>`;
+  for (let i = 1; i <= pages; i++) {
+    if (i===1||i===pages||Math.abs(i-currentPage)<=2)
+      html += `<button class="pg-btn ${i===currentPage?'on':''}" onclick="goPage(${i})">${i}</button>`;
+    else if (Math.abs(i-currentPage)===3)
+      html += `<span style="color:var(--text3);align-self:center;padding:0 4px">…</span>`;
+  }
+  html += `<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>▶</button>`;
+  document.getElementById('pager').innerHTML = html;
+}
+
+function goPage(n) {
+  const pages = Math.ceil(filtered.length / PAGE_SIZE);
+  currentPage = Math.max(1, Math.min(n, pages));
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function sortBy(key) {
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = true; }
+  applyFilters();
+}
+
+// ═══════════════════════════════════════
+// DETAIL
+// ═══════════════════════════════════════
+function openDetail(ecode) {
+  const p = allParts.find(x => x.ecode === ecode);
+  if (!p) return;
+  const stockNum = parseInt(p.stock) || 0;
+  const photo = driveThumb(p.photo);
+  const photoFull = driveView(p.photo);
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="det-photo">
+      ${photo
+        ? `<img src="${photo}" alt="${p.desc}" onerror="this.style.display='none';this.parentElement.querySelector('.big-ico').style.display='block'">`
+        : ''}
+      <div class="big-ico" style="${photo?'display:none':''}">⚙</div>
+    </div>
+    <div class="det-grid">
+      <div class="det-field"><div class="lbl">E-Code</div><div class="val mono">${p.ecode||'—'}</div></div>
+      <div class="det-field"><div class="lbl">Part Number</div><div class="val mono" style="color:var(--text)">${p.partno||'—'}</div></div>
+      <div class="det-field det-full"><div class="lbl">Description</div><div class="val desc">${p.desc||'—'}</div></div>
+      <div class="det-field"><div class="lbl">Category</div><div class="val">${p.category||'—'}</div></div>
+      <div class="det-field"><div class="lbl">Equipment</div><div class="val" style="color:var(--blue)">${p.equipment||'—'}</div></div>
+      <div class="det-field"><div class="lbl">Make / Brand</div><div class="val">${p.make||'—'}</div></div>
+      <div class="det-field"><div class="lbl">Location</div><div class="val loc">${p.location||'—'}</div></div>
+    </div>
+    <div class="stock-row">
+      <div>
+        <div class="lbl">Current Stock</div>
+        <div class="qty ${stockNum>0?'ok':'zero'}">${p.stock||0}</div>
+      </div>
+      ${p.photo ? `<a href="${photoFull}" target="_blank" style="color:var(--gold);font-size:12px;text-decoration:none;border:1px solid rgba(240,165,0,0.3);padding:6px 12px;border-radius:5px;background:rgba(240,165,0,0.08)">🔍 Full Photo</a>` : ''}
+    </div>
+  `;
+  document.getElementById('detailOverlay').classList.remove('hidden');
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════
+// GOOGLE DRIVE HELPERS
+// ═══════════════════════════════════════
+function extractDriveId(url) {
+  if (!url) return null;
+  const m = url.match(/[-\w]{25,}/);
+  return m ? m[0] : null;
+}
+function driveThumb(url) {
+  const id = extractDriveId(url);
+  return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w300` : null;
+}
+function driveView(url) {
+  const id = extractDriveId(url);
+  return id ? `https://drive.google.com/file/d/${id}/view` : url;
+}
+
+// ═══════════════════════════════════════
+// HIGHLIGHT
+// ═══════════════════════════════════════
+function hl(text, q) {
+  if (!q || !text) return text || '';
+  return text.toString().replace(
+    new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'),
+    '<mark>$1</mark>'
+  );
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+let _tt;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  clearTimeout(_tt); _tt = setTimeout(() => t.className = 'toast', 3000);
+}
+
+// ═══════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('catFilter').addEventListener('change', applyFilters);
+document.getElementById('eqFilter').addEventListener('change', applyFilters);
+document.getElementById('locFilter').addEventListener('change', applyFilters);
+
+document.getElementById('gridBtn').addEventListener('click', () => {
+  viewMode = 'grid';
+  document.getElementById('gridBtn').classList.add('on');
+  document.getElementById('listBtn').classList.remove('on');
+  render();
+});
+document.getElementById('listBtn').addEventListener('click', () => {
+  viewMode = 'list';
+  document.getElementById('listBtn').classList.add('on');
+  document.getElementById('gridBtn').classList.remove('on');
+  render();
+});
+
+document.getElementById('detailOverlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeDetail();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeDetail();
+});
+
+// ═══════════════════════════════════════
+// UPDATE PHOTOS
+// ═══════════════════════════════════════
+async function updatePhotos() {
+  const btn = document.getElementById('photoBtn');
+  const ico = document.getElementById('photoIcon');
+  btn.style.opacity = '0.6';
+  btn.style.pointerEvents = 'none';
+  ico.textContent = '⏳';
+  showToast('Drive folder scan kare che...', '');
+
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=updatePhotos', { redirect: 'follow' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if (json.status === 'ok') {
+      showToast('✓ ' + json.message, 'ok');
+      // Reload data to show new photos
+      setTimeout(() => fetchParts(), 1000);
+    } else {
+      throw new Error(json.message || 'Unknown error');
+    }
+  } catch (err) {
+    showToast('Photo update failed: ' + err.message, 'err');
+  } finally {
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+    ico.textContent = '📷';
+  }
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+fetchParts();
+</script>
+</body>
+</html>
