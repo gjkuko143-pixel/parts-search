@@ -520,6 +520,9 @@ mark { background: rgba(240,165,0,0.25); color: var(--text); border-radius: 2px;
     <button class="sync-btn" id="photoBtn" onclick="updatePhotos()" style="color:var(--gold);border-left:1px solid var(--border)">
       <span id="photoIcon">📷</span> Update Photos
     </button>
+    <button class="sync-btn" id="keyBtn" onclick="openKeyModal()" style="color:var(--text2);border-left:1px solid var(--border)" title="Set Gemini API Key">
+      🔑 AI Key
+    </button>
   </div>
 </header>
 
@@ -583,6 +586,35 @@ mark { background: rgba(240,165,0,0.25); color: var(--text); border-radius: 2px;
     </div>
   </div>
   <div class="pager" id="pager"></div>
+</div>
+
+
+<!-- API KEY MODAL -->
+<div class="overlay hidden" id="keyModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-hd">
+      <h2>🔑 Gemini API Key</h2>
+      <button class="modal-x" onclick="closeKeyModal()">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div style="background:rgba(240,165,0,0.08);border:1px solid rgba(240,165,0,0.2);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;line-height:1.7;color:var(--text2)">
+        <strong style="color:var(--gold)">🔒 Secure Storage</strong><br>
+        Key tari browser ma locally store thase — GitHub par nahi jase.<br>
+        Free key: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--gold)">aistudio.google.com/apikey</a>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px">Gemini API Key</label>
+        <input type="password" id="keyInput" placeholder="AIzaSy..." 
+          style="width:100%;background:var(--s3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 14px;border-radius:7px;outline:none"
+          onkeydown="if(event.key==='Enter')saveKey()">
+      </div>
+      <div id="keyStatus" style="font-size:12px;color:var(--text3);margin-bottom:14px;font-family:var(--mono)"></div>
+      <div style="display:flex;gap:10px">
+        <button onclick="saveKey()" class="img-search-btn" style="flex:1">💾 Save Key</button>
+        <button onclick="clearKey()" style="padding:10px 16px;background:none;border:1px solid var(--border2);color:var(--text3);border-radius:7px;cursor:pointer;font-family:var(--head)">Clear</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- DETAIL MODAL -->
@@ -983,8 +1015,12 @@ async function updatePhotos() {
 // ═══════════════════════════════════════
 // IMAGE SEARCH — Gemini Vision AI
 // ═══════════════════════════════════════
-const GEMINI_KEY = 'AIzaSyD4RH58YjNfpm1tVzbHgmF8GZrBPbsFg_M';
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=' + GEMINI_KEY;
+const GEMINI_KEY = (() => {
+  // Key localStorage ma store thay — GitHub ma visible nathi
+  let k = localStorage.getItem('gemini_api_key');
+  return k || '';
+})();
+// GEMINI_URL built dynamically in runImageSearch using getGeminiKey()
 
 let uploadedImgBase64 = null;
 let uploadedImgMime = null;
@@ -1033,7 +1069,13 @@ Describe this part in detail focusing on:
 Return a comma-separated list of technical keywords that would help match this to a database of spare parts.
 Keep response under 100 words, focus on searchable technical terms.`;
 
-    const geminiRes = await fetch(GEMINI_URL, {
+    const activeKey = getGeminiKey();
+    if (!activeKey) {
+      openKeyModal();
+      throw new Error('Gemini API Key set karo — 🔑 AI Key button dabao');
+    }
+    const activeUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=' + activeKey;
+    const geminiRes = await fetch(activeUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1047,7 +1089,11 @@ Keep response under 100 words, focus on searchable technical terms.`;
       })
     });
 
-    if (!geminiRes.ok) throw new Error('Gemini API error: ' + geminiRes.status);
+    if (!geminiRes.ok) {
+      const errJson = await geminiRes.json().catch(() => ({}));
+      const errMsg = errJson?.error?.message || geminiRes.status;
+      throw new Error('Gemini API error: ' + errMsg);
+    }
     const geminiData = await geminiRes.json();
     const aiDesc = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
@@ -1161,6 +1207,50 @@ function clearImgSearch() {
   document.getElementById('imgResultsBanner').classList.remove('show');
 
   applyFilters();
+}
+
+
+// ═══════════════════════════════════════
+// API KEY MANAGEMENT
+// ═══════════════════════════════════════
+function openKeyModal() {
+  const existing = localStorage.getItem('gemini_api_key') || '';
+  document.getElementById('keyInput').value = existing;
+  document.getElementById('keyStatus').textContent = existing 
+    ? '✓ Key saved — ' + existing.substring(0,8) + '...' 
+    : 'Key not set';
+  document.getElementById('keyModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('keyInput').focus(), 100);
+}
+
+function closeKeyModal() {
+  document.getElementById('keyModal').classList.add('hidden');
+}
+
+function saveKey() {
+  const key = document.getElementById('keyInput').value.trim();
+  if (!key || !key.startsWith('AIza')) {
+    document.getElementById('keyStatus').textContent = '⚠️ Valid key "AIza..." thi sharu thavu joiye';
+    document.getElementById('keyStatus').style.color = 'var(--red)';
+    return;
+  }
+  localStorage.setItem('gemini_api_key', key);
+  document.getElementById('keyStatus').textContent = '✓ Key saved!';
+  document.getElementById('keyStatus').style.color = 'var(--green)';
+  document.getElementById('keyBtn').style.color = 'var(--green)';
+  showToast('✓ Gemini API Key saved!', 'ok');
+  setTimeout(() => closeKeyModal(), 1000);
+}
+
+function clearKey() {
+  localStorage.removeItem('gemini_api_key');
+  document.getElementById('keyInput').value = '';
+  document.getElementById('keyStatus').textContent = 'Key cleared';
+  document.getElementById('keyBtn').style.color = 'var(--text2)';
+}
+
+function getGeminiKey() {
+  return localStorage.getItem('gemini_api_key') || '';
 }
 
 // ═══════════════════════════════════════
