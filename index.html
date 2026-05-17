@@ -1074,7 +1074,7 @@ Keep response under 100 words, focus on searchable technical terms.`;
       openKeyModal();
       throw new Error('Gemini API Key set karo — 🔑 AI Key button dabao');
     }
-    const activeUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=' + activeKey;
+    const activeUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=' + activeKey;
     const geminiRes = await fetch(activeUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
